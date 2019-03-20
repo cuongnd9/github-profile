@@ -1,28 +1,42 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { connect} from "react-redux";
+import UserInfo from './UserInfo';
+import { thunkActionCreator } from './actions/fetchAction';
 
 class App extends Component {
+  handleSubmit = e => {
+    e.preventDefault();
+    const username = this.getUsername.value;
+    this.props.dispatch(thunkActionCreator(username));
+    this.getUsername.value = "";
+  };
+
   render() {
+    const { isFetching, isError, userData } = this.props.data;
     return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
+      <div className='container'>
+        <form onSubmit={this.handleSubmit} className='form'>
+          <h2 className='title'>Enter the Github username</h2>
+          <input
+            type="text"
+            placeholder="Enter Github username"
+            required
+            ref={input => (this.getUsername = input)}
+          />
+          <button className="button">Submit</button>
+        </form>
+        {isFetching ? <h3>Loading...</h3> : null}
+        {isError ? <h3>No such user exists.</h3> : null}
+        {Object.keys(userData).length > 0 ? (
+          <UserInfo user={userData}/>
+        ) : null}
       </div>
     );
   }
 }
 
-export default App;
+const mapStateToProps = state => ({
+  data: state
+});
+
+export default connect(mapStateToProps)(App);
